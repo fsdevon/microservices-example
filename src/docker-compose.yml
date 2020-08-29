@@ -1,0 +1,74 @@
+version: '3.4'
+
+services:
+
+  seq:
+    image: datalust/seq:latest
+    container_name: ${REGISTRY:-mse}_seq_log
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: ${REGISTRY:-mse}_sqlserver
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    container_name: mse_zookeeper
+
+  broker:
+    image: confluentinc/cp-kafka:latest
+    hostname: broker
+    container_name: mse_broker
+    depends_on:
+      - zookeeper
+
+  identity-api:
+    image: ${REGISTRY:-mse}/identity.api:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: ${REGISTRY:-mse}_identity-api
+    build:
+      context: .
+      dockerfile: Services/Identity/Identity.API/Dockerfile
+    depends_on:
+      - sqlserver
+
+  webmvc:
+    image: ${REGISTRY:-mse}/webmvc:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: ${REGISTRY:-mse}_webmvc
+    build:
+      context: .
+      dockerfile: Web/WebMVC/Dockerfile
+    depends_on:
+      - broker
+      - identity-api
+
+  webstatus:
+    image: ${REGISTRY:-mse}/webstatus:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: ${REGISTRY:-mse}_webstatus
+    build:
+      context: .
+      dockerfile: Web/WebStatus/Dockerfile
+
+  catalog-api:
+    image: ${REGISTRY:-mse}/catalog.api:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: ${REGISTRY:-mse}_catalog-api
+    build:
+      context: .
+      dockerfile: Services/Catalog/Catalog.API/Dockerfile
+    depends_on:
+      - sqlserver
+
+  web-bff-aggregator:
+    image: ${REGISTRY:-mse}/web.bff.aggregator:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: ${REGISTRY:-mse}_web-bff-aggregator
+    build:
+      context: .
+      dockerfile: ApiGateways/Web.BFF.Example/Aggregator/Dockerfile
+    depends_on:
+      - sqlserver
+      - identity-api
+      - catalog-api
+
+  web-example-apigw:
+    image: envoyproxy/envoy:latest
+    container_name: ${REGISTRY:-mse}_web-example-apigw
+

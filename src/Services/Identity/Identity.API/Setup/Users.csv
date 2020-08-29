@@ -1,0 +1,2 @@
+CardHolderName,CardNumber,CardType,City,Country,Email,Expiration,LastName,Name,PhoneNumber,UserName,ZipCode,State,Street,SecurityNumber,NormalizedEmail,NormalizedUserName,Password
+DemoUser,4.01289E+15,1,Da Nang,Vietnam,ms@example.com,20-Dec,DemoLastName,DemoUser,1234567890,ms@example.com,98052,WA,15703 NE 61st Ct,535,ms@example.com,ms@example.com,Pass@word1
